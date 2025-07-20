@@ -1,0 +1,99 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Employee Management Website</title>
+    <style>
+      /* Full-page background */
+      body {
+        margin: 0;
+        padding: 0;
+        font-family: sans-serif;
+        background: url("background.jpeg") no-repeat center/cover;
+        color: #333;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        height: 100vh;
+      }
+      /* Container for centered content */
+      .container {
+        background: rgba(255, 255, 255, 0.9);
+        padding: 2rem;
+        border-radius: 8px;
+        max-width: 700px;
+        width: 90%;
+        text-align: center;
+        box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+      }
+      header {
+        margin-bottom: 1.5rem;
+      }
+      h1 {
+        font-size: 2rem;
+        margin: 0;
+        text-transform: uppercase;
+        letter-spacing: 1px;
+      }
+      .subtitle {
+        font-size: 1.25rem;
+        margin: 0.5rem 0 2rem;
+        color: #bdda1d;
+      }
+      .profiles {
+        list-style: none;
+        padding: 0;
+        margin: 2rem 0 0;
+        display: grid;
+        grid-template-columns: 1fr;
+        gap: 0.75rem;
+        width: 100%;
+      }
+      .profiles button {
+        padding: 0.75rem;
+        font-size: 1rem;
+        border: none;
+        border-radius: 4px;
+        background: #0077cc;
+        color: #fff;
+        cursor: pointer;
+        transition: background 0.3s;
+        width: 100%;
+      }
+      .profiles button:hover {
+        background: #005fa3;
+      }
+    </style>
+  </head>
+  <body>
+    <div class="container">
+      <header>
+        <h1>Savannah Seritech Hourly Reporting Platform</h1>
+      </header>
+
+      <p>Please record your time by selecting your profile below:</p>
+      <ul class="profiles" id="employee-list">
+        <!-- JavaScript will inject employee buttons here -->
+      </ul>
+    </div>
+    <script>
+      const employees = ["Fred", "Velma", "Eugine"];
+      const list = document.getElementById("employee-list");
+      employees.forEach((name) => {
+        const li = document.createElement("li");
+        const btn = document.createElement("button");
+        btn.textContent = name;
+        btn.onclick = () =>
+          (window.location.href = `dashboard.html?user=${encodeURIComponent(
+            name
+          )}`);
+        li.appendChild(btn);
+        list.appendChild(li);
+      });
+    </script>
+  </body>
+</html>

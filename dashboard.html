@@ -1,0 +1,201 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Dashboard</title>
+    <style>
+      body {
+        margin: 0;
+        padding: 0;
+        font-family: sans-serif;
+        background: #f0f0f0;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        min-height: 100vh;
+      }
+      .container {
+        background: rgba(255, 255, 255, 0.9);
+        padding: 2rem;
+        border-radius: 8px;
+        max-width: 500px;
+        width: 90%;
+        text-align: center;
+        box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+      }
+      h1 {
+        font-size: 2rem;
+        margin: 0;
+        text-transform: uppercase;
+        letter-spacing: 1px;
+        color: #333;
+      }
+      p.welcome {
+        font-size: 1.25rem;
+        margin: 0.5rem 0 2rem;
+        color: #555;
+      }
+      .form-group {
+        margin: 1rem 0;
+      }
+      label {
+        display: block;
+        font-size: 1rem;
+        margin-bottom: 0.5rem;
+        color: #333;
+      }
+      input,
+      select {
+        width: 80%;
+        max-width: 300px;
+        padding: 0.5rem;
+        font-size: 1rem;
+        border: 1px solid #ccc;
+        border-radius: 4px;
+        margin: 0 auto;
+      }
+      .button-group {
+        display: flex;
+        justify-content: center;
+        gap: 1rem;
+        margin: 1.5rem 0;
+      }
+      button {
+        padding: 0.75rem 1.5rem;
+        font-size: 1rem;
+        border: none;
+        border-radius: 4px;
+        background: #0077cc;
+        color: #fff;
+        cursor: pointer;
+        transition: background 0.3s;
+      }
+      button:hover {
+        background: #005fa3;
+      }
+      button:disabled {
+        background: #ccc;
+        cursor: not-allowed;
+      }
+      #status {
+        margin-top: 1rem;
+        font-size: 1rem;
+        color: #333;
+      }
+    </style>
+  </head>
+  <body>
+    <div class="container">
+      <h1 id="title">Dashboard</h1>
+      <p class="welcome" id="welcome">Welcome!</p>
+
+      <div class="form-group">
+        <label for="week-start">This is the week starting:</label>
+        <input type="date" id="week-start" required />
+      </div>
+
+      <div class="form-group">
+        <label for="day-select">Day of the Week:</label>
+        <select id="day-select" required>
+          <option value="Monday">Monday</option>
+          <option value="Tuesday">Tuesday</option>
+          <option value="Wednesday">Wednesday</option>
+          <option value="Thursday">Thursday</option>
+          <option value="Friday">Friday</option>
+          <option value="Saturday">Saturday</option>
+          <option value="Sunday">Sunday</option>
+        </select>
+      </div>
+
+      <div class="form-group">
+        <label for="time-input">Time:</label>
+        <input type="time" id="time-input" required />
+      </div>
+
+      <div class="button-group">
+        <button id="clock-in">Clock In</button>
+        <button id="clock-out">Clock Out</button>
+      </div>
+
+      <div id="status"></div>
+    </div>
+
+    <script>
+      const params = new URLSearchParams(window.location.search);
+      const user = params.get("user") || "Unknown";
+
+      document.getElementById("title").textContent = `${user}'s Dashboard`;
+      document.getElementById("welcome").textContent = `Hello, ${user}!`;
+
+      // Auto-set week start to most recent Monday (ISO for picker)
+      function getThisMonday(date) {
+        const d = new Date(date);
+        const day = d.getDay();
+        const diff = (day + 6) % 7; // Mon=0
+        d.setDate(d.getDate() - diff);
+        return d.toISOString().slice(0, 10);
+      }
+      const today = new Date();
+      document.getElementById("week-start").value = getThisMonday(today);
+
+      // Auto-set day selector to today
+      const weekdays = [
+        "Sunday",
+        "Monday",
+        "Tuesday",
+        "Wednesday",
+        "Thursday",
+        "Friday",
+        "Saturday",
+      ];
+      document.getElementById("day-select").value = weekdays[today.getDay()];
+
+      // Format ISO YYYY-MM-DD to M/D/YYYY
+      function formatUSDate(isoDate) {
+        const [y, m, d] = isoDate.split("-");
+        return `${parseInt(m, 10)}/${parseInt(d, 10)}/${y}`;
+      }
+
+      async function sendEvent(action) {
+        const isoWeek = document.getElementById("week-start").value; // "YYYY-MM-DD"
+        const weekStart = formatUSDate(isoWeek); // "M/D/YYYY"
+        const day = document.getElementById("day-select").value;
+        const timeInput = document.getElementById("time-input").value;
+        if (!isoWeek || !day || !timeInput) {
+          alert("Please fill in week start, day, and time.");
+          return;
+        }
+
+        const clockTime = timeInput; // "HH:MM"
+
+        const payload = { user, action, weekStart, day, clockTime };
+        const webhookUrl =
+          "https://hook.eu2.make.com/0yqcesyybh1tx4mmgt8ra7tusg6rpo2h";
+
+        try {
+          const res = await fetch(webhookUrl, {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify(payload),
+          });
+          if (!res.ok) throw new Error("Network response was not ok");
+          document.getElementById(
+            "status"
+          ).textContent = `${action} for ${day} (week ${weekStart}) recorded at ${clockTime}`;
+        } catch (err) {
+          document.getElementById(
+            "status"
+          ).textContent = `Error: ${err.message}`;
+        }
+      }
+
+      document
+        .getElementById("clock-in")
+        .addEventListener("click", () => sendEvent("Clock In"));
+      document
+        .getElementById("clock-out")
+        .addEventListener("click", () => sendEvent("Clock Out"));
+    </script>
+  </body>
+</html>
